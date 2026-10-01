@@ -221,6 +221,10 @@
             pointer-events: auto;
         }
 
+        .mobile-drawer-handle {
+            display: none;
+        }
+
         .panel-widget-card {
             background: rgba(255, 255, 255, 0.96);
             backdrop-filter: blur(14px);
@@ -491,9 +495,9 @@
         }
 
         .btn-close-modal:hover {
-            background: #fee2e2;
-            color: #dc2626;
-            border-color: #fca5a5;
+            background: #f1f5f9;
+            color: #1e293b;
+            border-color: #cbd5e1;
         }
 
         .modal-body-container {
@@ -896,18 +900,24 @@
             flex-direction: column;
             gap: 8px;
             z-index: 990;
+            transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Di desktop ketika detail modal terbuka, geser kontrol agar tidak tertutup */
+        body.detail-modal-open .map-floating-controls {
+            right: 435px;
         }
 
         .btn-map-control {
             width: 42px;
             height: 42px;
             border-radius: 12px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            box-shadow: var(--shadow-card);
-            color: var(--gray-800);
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12);
+            color: var(--gray-700);
             font-size: 15px;
             display: flex;
             align-items: center;
@@ -919,7 +929,8 @@
         .btn-map-control:hover {
             background: #ffffff;
             color: #2563eb;
-            transform: scale(1.05);
+            transform: scale(1.06);
+            box-shadow: 0 6px 18px rgba(37, 99, 235, 0.18);
         }
 
         /* --- PIN MARKER STYLES --- */
@@ -967,11 +978,12 @@
             transform: rotate(45deg);
         }
 
+        /* Badge nomor pin menggunakan Soft Royal Blue (#2563eb), bukan merah */
         .pin-badge-id {
             position: absolute;
             top: -4px;
             right: -4px;
-            background: #ef4444;
+            background: #2563eb;
             color: #ffffff;
             font-size: 10px;
             font-weight: 800;
@@ -990,9 +1002,9 @@
         .gmaps-lightbox-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(10, 15, 30, 0.95);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
+            background: rgba(10, 15, 30, 0.96);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             z-index: 99999 !important;
             display: flex;
             flex-direction: column;
@@ -1015,7 +1027,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 16px 24px;
-            background: linear-gradient(180deg, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0) 100%);
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.88) 0%, rgba(0, 0, 0, 0) 100%);
             color: #ffffff;
             z-index: 100000;
         }
@@ -1094,71 +1106,95 @@
         }
 
         .lightbox-close-btn:hover {
-            background: rgba(239, 68, 68, 0.9);
+            background: rgba(59, 130, 246, 0.85);
             transform: scale(1.08);
         }
 
+        /* LIGHTBOX BODY DENGAN FLOATING BUTTON AGAR TIDAK TERPOTONG */
         .lightbox-body {
             flex: 1;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            padding: 10px 24px;
+            justify-content: center;
+            padding: 10px 16px;
             position: relative;
             overflow: hidden;
+            width: 100%;
+            height: 100%;
         }
 
         .lightbox-image-stage {
-            flex: 1;
+            width: 100%;
+            height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            max-height: calc(100vh - 190px);
             position: relative;
             z-index: 10;
         }
 
         .lightbox-image-stage img {
-            max-width: 85vw;
-            max-height: calc(100vh - 200px);
+            max-width: 88vw;
+            max-height: calc(100vh - 180px);
             object-fit: contain;
-            border-radius: 10px;
+            border-radius: 12px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
             transition: opacity 0.15s ease, transform 0.15s ease;
         }
 
+        /* Navigasi Melayang (Absolute) di Sisi Kiri & Kanan Layar - TIDAK AKAN PERNAH TERPOTONG */
         .lightbox-nav-btn {
-            background: rgba(255, 255, 255, 0.22);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1.5px solid rgba(255, 255, 255, 0.3);
             color: #ffffff;
-            width: 52px;
-            height: 52px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 1.35rem;
+            font-size: 1.25rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background 0.2s ease, transform 0.2s ease;
-            z-index: 100001;
-            flex-shrink: 0;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            transition: all 0.2s ease;
+            z-index: 100005;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
+            user-select: none;
         }
 
-        .lightbox-nav-btn:hover {
+        .lightbox-prev-btn {
+            left: 20px;
+        }
+
+        .lightbox-next-btn {
+            right: 20px;
+        }
+
+        .lightbox-nav-btn:hover, .lightbox-nav-btn:active {
             background: #2563eb;
-            transform: scale(1.12);
+            border-color: #60a5fa;
+            transform: translateY(-50%) scale(1.08);
         }
 
         .lightbox-footer-filmstrip {
             display: flex;
             gap: 8px;
-            padding: 12px 24px;
-            background: linear-gradient(0deg, rgba(0, 0, 0, 0.88) 0%, rgba(0, 0, 0, 0) 100%);
+            padding: 12px 20px;
+            background: linear-gradient(0deg, rgba(0, 0, 0, 0.92) 0%, rgba(0, 0, 0, 0) 100%);
             overflow-x: auto;
-            justify-content: center;
+            justify-content: flex-start;
             max-width: 100%;
             z-index: 100000;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .lightbox-footer-filmstrip::-webkit-scrollbar {
+            display: none;
         }
 
         .filmstrip-thumb {
@@ -1171,6 +1207,7 @@
             opacity: 0.6;
             transition: all 0.2s ease;
             flex-shrink: 0;
+            background: #1e293b;
         }
 
         .filmstrip-thumb:hover {
@@ -1190,7 +1227,35 @@
             display: block;
         }
 
-        /* --- MOBILE RESPONSIVE OPTIMIZATION --- */
+        /* --- TOAST NOTIFICATION --- */
+        .toast-notification {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(30px);
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(8px);
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 20px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 999999;
+            white-space: nowrap;
+        }
+
+        .toast-notification.active {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* =========================================================
+           --- MOBILE RESPONSIVE OPTIMIZATION (SEMPURNA & BEBAS TINDIH) ---
+           ========================================================= */
         @media (max-width: 768px) {
             .app-header {
                 top: 10px;
@@ -1233,6 +1298,28 @@
                 justify-content: center;
             }
 
+            /* 
+               KUNCI PERBAIKAN: 
+               Pindahkan kontrol peta (zoom in/out, muat peta, ganti layer) 
+               ke pojok kanan atas di bawah header agar TIDAK MENUMPUK dengan card daftar restoran!
+            */
+            .map-floating-controls {
+                top: 72px !important;
+                right: 12px !important;
+                bottom: auto !important;
+                left: auto !important;
+                gap: 6px;
+                z-index: 950 !important;
+            }
+
+            .btn-map-control {
+                width: 38px;
+                height: 38px;
+                font-size: 13.5px;
+                border-radius: 10px;
+                box-shadow: 0 3px 10px rgba(15, 23, 42, 0.18);
+            }
+
             /* Sidebar on mobile: Bottom Drawer */
             .left-floating-container {
                 position: fixed;
@@ -1242,10 +1329,10 @@
                 width: auto;
                 max-height: 46vh;
                 top: auto;
-                border-radius: 16px;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                border-radius: 18px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
                 z-index: 900;
-                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
             }
 
             .left-floating-container.sheet-hidden {
@@ -1253,8 +1340,25 @@
                 pointer-events: none;
             }
 
+            /* Pegangan geser / drag handle mobile pada panel daftar */
+            .mobile-drawer-handle {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 6px 0 2px 0;
+                cursor: pointer;
+                width: 100%;
+            }
+
+            .drawer-handle-bar {
+                width: 44px;
+                height: 4.5px;
+                background: #cbd5e1;
+                border-radius: 10px;
+            }
+
             .list-widget {
-                max-height: 32vh;
+                max-height: 30vh;
             }
 
             /* Detail Card as a sleek Bottom Sheet on mobile */
@@ -1303,12 +1407,12 @@
 
             /* Lightbox Mobile Adjustments */
             .lightbox-header {
-                padding: 12px 14px;
+                padding: 10px 14px;
             }
 
             .lightbox-resto-name {
                 font-size: 0.95rem;
-                max-width: 140px;
+                max-width: 150px;
             }
 
             .gmaps-btn-text {
@@ -1320,33 +1424,38 @@
             }
 
             .lightbox-body {
-                padding: 6px 8px;
-            }
-
-            .lightbox-nav-btn {
-                width: 44px;
-                height: 44px;
-                font-size: 1.15rem;
-            }
-
-            .lightbox-footer-filmstrip {
-                padding: 8px 10px;
-                gap: 6px;
-            }
-
-            .filmstrip-thumb {
-                width: 48px;
-                height: 36px;
+                padding: 4px 0;
+                position: relative;
             }
 
             .lightbox-image-stage img {
-                max-width: 96vw;
-                max-height: calc(100vh - 160px);
+                max-width: 92vw;
+                max-height: calc(100vh - 165px);
             }
 
-            .map-floating-controls {
-                bottom: 80px;
-                right: 14px;
+            .lightbox-nav-btn {
+                width: 42px;
+                height: 42px;
+                font-size: 1.15rem;
+            }
+
+            .lightbox-prev-btn {
+                left: 10px;
+            }
+
+            .lightbox-next-btn {
+                right: 10px;
+            }
+
+            .lightbox-footer-filmstrip {
+                padding: 8px 12px;
+                gap: 6px;
+                justify-content: flex-start;
+            }
+
+            .filmstrip-thumb {
+                width: 50px;
+                height: 38px;
             }
         }
     </style>
@@ -1378,11 +1487,11 @@
 
             <!-- Header Actions -->
             <div class="header-actions">
-                <button class="btn-header-tool active" id="btnToggleBuffer">
+                <button class="btn-header-tool active" id="btnToggleBuffer" title="Tampilkan / Sembunyikan Radius Buffer 400m">
                     <i class="fa-solid fa-bullseye"></i>
                     <span>Buffer Radius</span>
                 </button>
-                <button class="btn-header-tool" id="btnToggleDrawer">
+                <button class="btn-header-tool" id="btnToggleDrawer" title="Tampilkan / Sembunyikan Panel Data Restoran">
                     <i class="fa-solid fa-sliders"></i>
                     <span>Panel Data</span>
                 </button>
@@ -1391,6 +1500,11 @@
 
         <!-- Left Panels: Insight & Data List -->
         <div class="left-floating-container" id="leftContainer">
+            <!-- Mobile Drawer Drag Handle -->
+            <div class="mobile-drawer-handle" id="mobileDrawerHandle" title="Ketuk untuk sembunyikan atau tampilkan panel daftar">
+                <div class="drawer-handle-bar"></div>
+            </div>
+
             <!-- Widget 1: Rangkuman Hasil Insight -->
             <div class="panel-widget-card insight-widget">
                 <div class="insight-top-row">
@@ -1516,29 +1630,32 @@
             </div>
         </div>
 
-        <!-- Floating Map Controls -->
-        <div class="map-floating-controls">
+        <!-- Floating Map Controls (Zoom in/out, Fit Bounds, Layer Switcher) -->
+        <div class="map-floating-controls" id="mapFloatingControls">
             <button class="btn-map-control" id="btnZoomIn" title="Perbesar Peta">
                 <i class="fa-solid fa-plus"></i>
             </button>
             <button class="btn-map-control" id="btnZoomOut" title="Perkecil Peta">
                 <i class="fa-solid fa-minus"></i>
             </button>
-            <button class="btn-map-control" id="btnFitAll" title="Tampilkan Semua Lokasi">
+            <button class="btn-map-control" id="btnFitAll" title="Muat Semua Peta / Tampilkan Seluruh Lokasi">
                 <i class="fa-solid fa-expand"></i>
             </button>
-            <button class="btn-map-control" id="btnLayerToggle" title="Ganti Tampilan Peta">
+            <button class="btn-map-control" id="btnLayerToggle" title="Ganti Tampilan Lapisan Peta">
                 <i class="fa-solid fa-layer-group"></i>
             </button>
         </div>
 
-        <!-- FULLSCREEN LIGHTBOX / GOOGLE MAPS PHOTO VIEWER (PLACED BEFORE SCRIPT) -->
+        <!-- Toast Notification Box -->
+        <div id="toastNotification" class="toast-notification"></div>
+
+        <!-- FULLSCREEN LIGHTBOX / GOOGLE MAPS PHOTO VIEWER -->
         <div class="gmaps-lightbox-overlay" id="gmapsLightbox" onclick="handleLightboxBackdropClick(event)">
             <div class="lightbox-header">
                 <div class="lightbox-title-wrap">
                     <span class="lightbox-pin-icon"><i class="fa-solid fa-location-dot"></i></span>
                     <span class="lightbox-resto-name" id="lightboxRestoName">Nama Restoran</span>
-                    <span class="lightbox-counter-badge" id="lightboxCounter">1 / 8</span>
+                    <span class="lightbox-counter-badge" id="lightboxCounter">1 / 7</span>
                 </div>
                 <div class="lightbox-actions">
                     <a href="#" target="_blank" class="lightbox-gmaps-link" id="lightboxGmapsLink" title="Buka di Google Maps">
@@ -1550,12 +1667,14 @@
                 </div>
             </div>
             <div class="lightbox-body">
+                <!-- Floating Nav Prev Button - Posisi Absolute Aman dari Potongan -->
                 <button type="button" class="lightbox-nav-btn lightbox-prev-btn" id="btnLightboxPrev" onclick="lightboxPrev(event)" title="Foto Sebelumnya (←)">
                     <i class="fa-solid fa-chevron-left"></i>
                 </button>
                 <div class="lightbox-image-stage" id="lightboxStage">
                     <img src="" alt="Google Maps Photo" id="lightboxMainImg" referrerpolicy="no-referrer">
                 </div>
+                <!-- Floating Nav Next Button - Posisi Absolute Aman dari Potongan -->
                 <button type="button" class="lightbox-nav-btn lightbox-next-btn" id="btnLightboxNext" onclick="lightboxNext(event)" title="Foto Selanjutnya (→)">
                     <i class="fa-solid fa-chevron-right"></i>
                 </button>
@@ -1599,8 +1718,7 @@
                         "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWnR8TAaMcoKt2CkUcK-Hdc_u0T1vlzGchiaXwkL3BrdGTZD13yFvVQesTU3fF0gun6z1d66KqsVXdA_Ht_8aDrsykHgV2v7h8Cy71Zc0C-qfeCi-5x_v6fnTBGw3KSucuHygpJYxxINp_w=w800-h600-k-no",
                         "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWmvysG6Fayy7Ft872tt-3mItJmnQsVevlctnju2l0hFJWaXLz3c2X1j3kFKge94BH06hi70BeqTC93Ru1LUGOMZlfeXnvnXOFHbMLsX0bUJw1Oo6E4_yIrwnnzpjItjm6173Ln0s9qwaqYb=w800-h600-k-no",
                         "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWlnKKAcavc-OmxkzVmccF5lhQAWyTiX3fI50pi-0CEaqrjKU6kYzm9uSWG--rxMSCJuX67BmXzY_fm2eQc-TeRDy5ILaEU0-CzMedVl-fcqVue2yVvHatWV_WlFW_WymLIMQGeonGBJZl5d=w800-h600-k-no",
-                        "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWkgK6C6ShQiXBfdtxHXqzigHERBiXR6kRJ4ofG5X21bR1taivs-oDluRI7AJXKJM2iXUKl0GSQWL2DYBdSPDpDu6nfrhw2o2xjNwW_q-6gHQhaazJ99vIBOz_Gqjs5EPg8m9jGwEL-z1wC4=w800-h600-k-no",
-                        "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWm_JXctANld7E9bSMV3YUcLalkv_68f8r2Fx0mEaZRzdNxc7fqC1h_hqEeyv8CavGnr5SefevWecWsiS4Fo-U0JBPK7bM6sWfUcY90wbETaxkU-fcnSpWIY2dUB7ggWcIjTVW9=w800-h600-k-no"
+                        "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWkgK6C6ShQiXBfdtxHXqzigHERBiXR6kRJ4ofG5X21bR1taivs-oDluRI7AJXKJM2iXUKl0GSQWL2DYBdSPDpDu6nfrhw2o2xjNwW_q-6gHQhaazJ99vIBOz_Gqjs5EPg8m9jGwEL-z1wC4=w800-h600-k-no"
                 ],
                 "contact_type": "wa",
                 "raw_phone": "081385914505"
@@ -1865,6 +1983,7 @@
         });
 
         var layers = [tileGoogle, tileOSM, tileEsri];
+        var layerNames = ["Google Maps Standar", "OpenStreetMap", "Citra Satelit Esri"];
         var layerIndex = 0;
 
         var markersGroup = L.featureGroup().addTo(map);
@@ -1876,6 +1995,18 @@
         var activeLightboxPhotos = [];
         var activeLightboxIndex = 0;
         var currentActiveResto = null;
+
+        // Toast Helper
+        function showToast(msg) {
+            var toast = document.getElementById('toastNotification');
+            if (!toast) return;
+            toast.innerText = msg;
+            toast.classList.add('active');
+            clearTimeout(window._toastTimer);
+            window._toastTimer = setTimeout(function () {
+                toast.classList.remove('active');
+            }, 2200);
+        }
 
         // Render Lingkaran Buffer
         function renderBuffers(items) {
@@ -2156,7 +2287,7 @@
                     img.src = currentUrl;
                     img.style.opacity = '1';
                     img.style.transform = 'scale(1)';
-                }, 100);
+                }, 80);
             }
 
             var counter = document.getElementById('lightboxCounter');
@@ -2179,7 +2310,7 @@
                 var photoUrl = getPhotoUrl(p);
                 var t = document.createElement('div');
                 t.className = 'filmstrip-thumb' + (i === activeLightboxIndex ? ' active' : '');
-                t.innerHTML = `<img src="${photoUrl}" alt="Thumb ${i + 1}">`;
+                t.innerHTML = `<img src="${photoUrl}" alt="Thumb ${i + 1}" onerror="this.parentElement.style.display='none'">`;
                 t.addEventListener('click', function (e) {
                     e.stopPropagation();
                     activeLightboxIndex = i;
@@ -2273,7 +2404,6 @@
 
             var cleanPhone = item.phone.replace(/[^0-9]/g, '');
             var contactBtn = document.getElementById('modalWaBtn');
-            var btnText = document.getElementById('modalWaBtnText');
 
             // Cek apakah jenis kontak adalah Call Only atau nomor telepon kantor lokal (021)
             if (item.contact_type === 'call' || cleanPhone.startsWith('021') || cleanPhone.startsWith('21')) {
@@ -2298,6 +2428,7 @@
 
             var detailCard = document.getElementById('mapidDetailCard');
             detailCard.style.display = 'block';
+            document.body.classList.add('detail-modal-open');
 
             // Di mobile: sembunyikan drawer panel list agar ruang layar bersih
             if (window.innerWidth <= 768) {
@@ -2313,6 +2444,7 @@
             if (e) { e.preventDefault(); e.stopPropagation(); }
             var detailCard = document.getElementById('mapidDetailCard');
             if (detailCard) detailCard.style.display = 'none';
+            document.body.classList.remove('detail-modal-open');
 
             // Di mobile: munculkan kembali panel list
             if (window.innerWidth <= 768) {
@@ -2356,6 +2488,7 @@
             showBuffers = !showBuffers;
             this.classList.toggle('active', showBuffers);
             renderBuffers(restaurantsData);
+            showToast(showBuffers ? 'Radius Buffer 400m Diaktifkan' : 'Radius Buffer Dinonaktifkan');
         });
 
         document.getElementById('btnToggleDrawer').addEventListener('click', function () {
@@ -2364,25 +2497,40 @@
             this.classList.toggle('active', !left.classList.contains('sheet-hidden'));
         });
 
+        var drawerHandle = document.getElementById('mobileDrawerHandle');
+        if (drawerHandle) {
+            drawerHandle.addEventListener('click', function () {
+                var left = document.getElementById('leftContainer');
+                left.classList.toggle('sheet-hidden');
+                var toggleBtn = document.getElementById('btnToggleDrawer');
+                if (toggleBtn) toggleBtn.classList.toggle('active', !left.classList.contains('sheet-hidden'));
+            });
+        }
+
         document.getElementById('btnBrandReset').addEventListener('click', function () {
             map.fitBounds(markersGroup.getBounds().pad(0.18));
+            showToast('Menampilkan seluruh lokasi kuliner');
         });
 
         // Kontrol Peta
         document.getElementById('btnZoomIn').addEventListener('click', function () {
             map.zoomIn();
         });
+
         document.getElementById('btnZoomOut').addEventListener('click', function () {
             map.zoomOut();
         });
+
         document.getElementById('btnFitAll').addEventListener('click', function () {
             map.fitBounds(markersGroup.getBounds().pad(0.18));
+            showToast('Memuat seluruh 9 restoran di peta');
         });
 
         document.getElementById('btnLayerToggle').addEventListener('click', function () {
             map.removeLayer(layers[layerIndex]);
             layerIndex = (layerIndex + 1) % layers.length;
             map.addLayer(layers[layerIndex]);
+            showToast('Lapisan Peta: ' + layerNames[layerIndex]);
         });
     </script>
 </body>

@@ -1,0 +1,2336 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Peta Interaktif Destinasi Kuliner Sentul</title>
+    <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- FontAwesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+
+    <style>
+        :root {
+            --theme-primary: #1e3a8a;
+            --theme-primary-hover: #1e40af;
+            --theme-secondary: #0f172a;
+            --theme-accent: #f59e0b;
+            --theme-bg: #f8fafc;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+            --font-head: 'Plus Jakarta Sans', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            --shadow-subtle: 0 4px 12px rgba(15, 23, 42, 0.05);
+            --shadow-card: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+            --shadow-float: 0 20px 35px -8px rgba(15, 23, 42, 0.22);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: var(--font-body);
+            background: var(--theme-bg);
+            color: var(--gray-800);
+        }
+
+        #app-viewport {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        /* --- APP HEADER --- */
+        .app-header {
+            position: absolute;
+            top: 16px;
+            left: 20px;
+            right: 20px;
+            height: 64px;
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-card);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            gap: 16px;
+        }
+
+        .brand-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .brand-icon-wrap {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 18px;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .brand-title-wrap {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-main-title {
+            font-family: var(--font-head);
+            font-weight: 700;
+            font-size: 17px;
+            color: var(--gray-900);
+            letter-spacing: -0.3px;
+        }
+
+        .brand-sub-title {
+            font-size: 11px;
+            color: var(--gray-500);
+            font-weight: 500;
+        }
+
+        .search-container {
+            flex: 1;
+            max-width: 460px;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-container i {
+            position: absolute;
+            left: 14px;
+            color: var(--gray-400);
+            font-size: 14px;
+        }
+
+        .app-search-input {
+            width: 100%;
+            height: 42px;
+            padding: 0 16px 0 40px;
+            border-radius: 30px;
+            border: 1px solid var(--gray-200);
+            background: #f8fafc;
+            font-size: 13.5px;
+            color: var(--gray-800);
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .app-search-input:focus {
+            background: #ffffff;
+            border-color: var(--theme-primary);
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.15);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-header-tool {
+            height: 40px;
+            padding: 0 14px;
+            border-radius: 20px;
+            border: 1px solid var(--gray-200);
+            background: #ffffff;
+            color: var(--gray-700);
+            font-size: 12.5px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-header-tool:hover {
+            border-color: #cbd5e1;
+            background: #f8fafc;
+        }
+
+        .btn-header-tool.active {
+            background: #eff6ff;
+            color: #2563eb;
+            border-color: rgba(37, 99, 235, 0.3);
+        }
+
+        /* --- LEFT FLOATING CONTAINER --- */
+        .left-floating-container {
+            position: absolute;
+            top: 92px;
+            left: 20px;
+            width: 380px;
+            max-height: calc(100vh - 110px);
+            z-index: 990;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            pointer-events: none;
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+        }
+
+        .left-floating-container > * {
+            pointer-events: auto;
+        }
+
+        .panel-widget-card {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-card);
+            padding: 16px;
+        }
+
+        .insight-widget {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .insight-top-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .insight-title {
+            font-family: var(--font-head);
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--gray-900);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .insight-tag {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 12px;
+            background: #e2e8f0;
+            color: #475569;
+        }
+
+        .insight-metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .metric-box {
+            background: #f8fafc;
+            border: 1px solid var(--gray-200);
+            border-radius: 10px;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .metric-label {
+            font-size: 10.5px;
+            color: var(--gray-500);
+            margin-bottom: 2px;
+        }
+
+        .metric-value {
+            font-family: var(--font-head);
+            font-size: 13.5px;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        .list-widget {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            max-height: calc(100vh - 270px);
+        }
+
+        .list-widget-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .list-widget-header h3 {
+            font-family: var(--font-head);
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--gray-800);
+        }
+
+        .list-scroll-view {
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-right: 4px;
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 transparent;
+        }
+
+        .list-scroll-view::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .list-scroll-view::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .resto-item-card {
+            background: rgba(255, 255, 255, 0.98);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            padding: 10px;
+            display: flex;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .resto-item-card:hover {
+            border-color: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.12);
+        }
+
+        .resto-item-card.active {
+            border-color: #2563eb;
+            background: #eff6ff;
+            box-shadow: 0 0 0 2px #2563eb;
+        }
+
+        .resto-thumb-img {
+            width: 68px;
+            height: 68px;
+            border-radius: 8px;
+            object-fit: cover;
+            flex-shrink: 0;
+            background: #e2e8f0;
+        }
+
+        .resto-info-col {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .card-top-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2px;
+        }
+
+        .badge-resto-id {
+            font-size: 10.5px;
+            font-weight: 700;
+            color: #2563eb;
+            background: #dbeafe;
+            padding: 1px 6px;
+            border-radius: 6px;
+        }
+
+        .card-rating-badge {
+            font-size: 11px;
+            font-weight: 700;
+            color: #d97706;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .card-name-title {
+            font-family: var(--font-head);
+            font-size: 13.5px;
+            font-weight: 700;
+            color: var(--gray-900);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 2px;
+        }
+
+        .card-cat-sub {
+            font-size: 11px;
+            color: var(--gray-500);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 3px;
+        }
+
+        .card-price-txt {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: #059669;
+        }
+
+        /* --- RIGHT FLOATING DETAIL MODAL --- */
+        .detail-floating-modal {
+            position: absolute;
+            top: 92px;
+            right: 24px;
+            width: 390px;
+            max-height: calc(100vh - 110px);
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-float);
+            z-index: 1001;
+            display: none;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 transparent;
+            animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .modal-header-line {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px 12px 20px;
+            border-bottom: 1px solid var(--gray-200);
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(10px);
+            z-index: 10;
+        }
+
+        .pill-number-tag {
+            font-family: var(--font-head);
+            font-size: 13px;
+            font-weight: 700;
+            color: #ffffff;
+            background: var(--theme-secondary);
+            padding: 3px 10px;
+            border-radius: 12px;
+        }
+
+        .btn-close-modal {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 1px solid var(--gray-200);
+            background: #ffffff;
+            color: var(--gray-500);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .btn-close-modal:hover {
+            background: #fee2e2;
+            color: #dc2626;
+            border-color: #fca5a5;
+        }
+
+        .modal-body-container {
+            padding: 18px 20px 24px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .modal-main-name {
+            font-family: var(--font-head);
+            font-size: 19px;
+            font-weight: 800;
+            color: var(--gray-900);
+            line-height: 1.3;
+        }
+
+        .modal-cat-subtitle {
+            font-size: 12px;
+            font-weight: 700;
+            color: #2563eb;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .modal-story-desc {
+            font-size: 12.8px;
+            color: var(--gray-600);
+            line-height: 1.55;
+        }
+
+        /* --- CAROUSEL FOTO GOOGLE MAPS --- */
+        .modal-carousel-section {
+            position: relative;
+            width: 100%;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            background: #0f172a;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+        }
+
+        .carousel-track-container {
+            position: relative;
+            width: 100%;
+            height: 185px;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            display: flex;
+            scrollbar-width: none;
+            cursor: pointer;
+        }
+
+        .carousel-track-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .carousel-slide-item {
+            flex: 0 0 100%;
+            width: 100%;
+            height: 100%;
+            scroll-snap-align: start;
+            position: relative;
+        }
+
+        .carousel-slide-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .carousel-nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            color: var(--gray-900);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+            z-index: 10;
+            transition: all 0.2s ease;
+        }
+
+        .carousel-nav-btn:hover {
+            background: #ffffff;
+            color: #2563eb;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .carousel-prev-btn { left: 8px; }
+        .carousel-next-btn { right: 8px; }
+
+        .carousel-dots-wrap {
+            position: absolute;
+            bottom: 8px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            z-index: 10;
+        }
+
+        .carousel-dot-pill {
+            width: 6px;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.5);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .carousel-dot-pill.active {
+            width: 18px;
+            background: #ffffff;
+        }
+
+        .carousel-counter-tag {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(4px);
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 20px;
+            z-index: 10;
+        }
+
+        /* --- GALERI FOTO GOOGLE MAPS GRID --- */
+        .gmaps-gallery-container {
+            margin: 4px 0;
+            padding: 12px;
+            background: #f8fafc;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-md);
+        }
+
+        .gmaps-gallery-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .gmaps-gallery-heading {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--gray-900);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .gmaps-gallery-count {
+            font-size: 11px;
+            font-weight: 700;
+            color: #2563eb;
+            background: #eff6ff;
+            padding: 2px 8px;
+            border-radius: 20px;
+            border: 1px solid #bfdbfe;
+        }
+
+        .gmaps-grid-wrapper {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            max-height: 190px;
+            overflow-y: auto;
+            padding-right: 2px;
+        }
+
+        .gmaps-grid-thumb {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            background: #0f172a;
+            border: 2px solid transparent;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .gmaps-grid-thumb:hover {
+            transform: scale(1.05);
+            border-color: #2563eb;
+        }
+
+        .gmaps-grid-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* --- PRICE PANEL --- */
+        .modal-price-panel {
+            background: #f8fafc;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .price-col-title {
+            font-size: 11px;
+            color: var(--gray-500);
+            margin-bottom: 2px;
+        }
+
+        .price-val-bold {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        .price-est-highlight {
+            font-family: var(--font-head);
+            font-size: 15px;
+            font-weight: 800;
+            color: #059669;
+        }
+
+        .modal-info-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 12.5px;
+            color: var(--gray-700);
+            line-height: 1.45;
+        }
+
+        .modal-info-row i {
+            font-size: 14px;
+            color: #2563eb;
+            margin-top: 2px;
+        }
+
+        .modal-bottom-profile {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 8px;
+            border-top: 1px solid var(--gray-200);
+            gap: 10px;
+        }
+
+        .profile-side-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .contact-avatar-circle {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--theme-secondary);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .contact-name-txt {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--gray-900);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .contact-sub-txt {
+            font-size: 11px;
+            color: var(--gray-500);
+        }
+
+        .actions-side-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .btn-contact-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #25d366;
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 8px 14px;
+            border-radius: 20px;
+            text-decoration: none;
+            box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .btn-contact-action:hover {
+            transform: translateY(-1px);
+            opacity: 0.95;
+        }
+
+        .btn-dir-action {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #2563eb;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            font-size: 13px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-dir-action:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        /* --- FLOATING MAP CONTROLS --- */
+        .map-floating-controls {
+            position: absolute;
+            bottom: 24px;
+            right: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 990;
+        }
+
+        .btn-map-control {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: var(--shadow-card);
+            color: var(--gray-800);
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-map-control:hover {
+            background: #ffffff;
+            color: #2563eb;
+            transform: scale(1.05);
+        }
+
+        /* --- PIN MARKER STYLES --- */
+        .custom-pin-element {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .custom-pin-element:hover {
+            transform: scale(1.15);
+            z-index: 99999 !important;
+        }
+
+        .pin-inner-wrapper {
+            position: relative;
+            width: 44px;
+            height: 52px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .pin-head-shape {
+            width: 38px;
+            height: 38px;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            background: #1e3a8a;
+            border: 2px solid #ffffff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .pin-img-inside {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: rotate(45deg);
+        }
+
+        .pin-badge-id {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #ef4444;
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 800;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 1.5px solid #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+            z-index: 5;
+        }
+
+        /* --- FULLSCREEN GOOGLE MAPS LIGHTBOX OVERLAY --- */
+        .gmaps-lightbox-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 15, 30, 0.95);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            z-index: 99999 !important;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.25s ease, visibility 0.25s ease;
+            user-select: none;
+        }
+
+        .gmaps-lightbox-overlay.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .lightbox-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0) 100%);
+            color: #ffffff;
+            z-index: 100000;
+        }
+
+        .lightbox-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            overflow: hidden;
+        }
+
+        .lightbox-pin-icon {
+            color: #ef4444;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .lightbox-resto-name {
+            font-size: 1.05rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .lightbox-counter-badge {
+            font-size: 0.75rem;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 3px 9px;
+            border-radius: 20px;
+            color: #f1f5f9;
+            flex-shrink: 0;
+        }
+
+        .lightbox-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .lightbox-gmaps-link {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #ffffff;
+            background: #2563eb;
+            padding: 8px 14px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s ease;
+        }
+
+        .lightbox-gmaps-link:hover {
+            background: #1d4ed8;
+        }
+
+        .lightbox-close-btn {
+            background: rgba(255, 255, 255, 0.18);
+            border: none;
+            color: #ffffff;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease, transform 0.2s ease;
+            z-index: 100001;
+        }
+
+        .lightbox-close-btn:hover {
+            background: rgba(239, 68, 68, 0.9);
+            transform: scale(1.08);
+        }
+
+        .lightbox-body {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .lightbox-image-stage {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            max-height: calc(100vh - 190px);
+            position: relative;
+            z-index: 10;
+        }
+
+        .lightbox-image-stage img {
+            max-width: 85vw;
+            max-height: calc(100vh - 200px);
+            object-fit: contain;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            transition: opacity 0.15s ease, transform 0.15s ease;
+        }
+
+        .lightbox-nav-btn {
+            background: rgba(255, 255, 255, 0.22);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.35rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease, transform 0.2s ease;
+            z-index: 100001;
+            flex-shrink: 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .lightbox-nav-btn:hover {
+            background: #2563eb;
+            transform: scale(1.12);
+        }
+
+        .lightbox-footer-filmstrip {
+            display: flex;
+            gap: 8px;
+            padding: 12px 24px;
+            background: linear-gradient(0deg, rgba(0, 0, 0, 0.88) 0%, rgba(0, 0, 0, 0) 100%);
+            overflow-x: auto;
+            justify-content: center;
+            max-width: 100%;
+            z-index: 100000;
+        }
+
+        .filmstrip-thumb {
+            width: 60px;
+            height: 44px;
+            border-radius: 6px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid transparent;
+            opacity: 0.6;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .filmstrip-thumb:hover {
+            opacity: 0.9;
+        }
+
+        .filmstrip-thumb.active {
+            opacity: 1;
+            border-color: #3b82f6;
+            transform: scale(1.08);
+        }
+
+        .filmstrip-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* --- MOBILE RESPONSIVE OPTIMIZATION --- */
+        @media (max-width: 768px) {
+            .app-header {
+                top: 10px;
+                left: 10px;
+                right: 10px;
+                height: 54px;
+                padding: 0 12px;
+            }
+
+            .brand-sub-title {
+                display: none;
+            }
+
+            .brand-main-title {
+                font-size: 14.5px;
+            }
+
+            .brand-icon-wrap {
+                width: 32px;
+                height: 32px;
+                font-size: 15px;
+            }
+
+            .search-container {
+                display: none;
+            }
+
+            .header-actions {
+                gap: 6px;
+            }
+
+            .btn-header-tool span {
+                display: none;
+            }
+
+            .btn-header-tool {
+                width: 36px;
+                height: 36px;
+                padding: 0;
+                justify-content: center;
+            }
+
+            /* Sidebar on mobile: Bottom Drawer */
+            .left-floating-container {
+                position: fixed;
+                left: 10px;
+                right: 10px;
+                bottom: 12px;
+                width: auto;
+                max-height: 46vh;
+                top: auto;
+                border-radius: 16px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                z-index: 900;
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            .left-floating-container.sheet-hidden {
+                transform: translateY(115%);
+                pointer-events: none;
+            }
+
+            .list-widget {
+                max-height: 32vh;
+            }
+
+            /* Detail Card as a sleek Bottom Sheet on mobile */
+            .detail-floating-modal {
+                position: fixed !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
+                top: auto !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                max-height: 65vh !important;
+                border-radius: 20px 20px 0 0 !important;
+                box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.25) !important;
+                z-index: 1000 !important;
+                overflow-y: auto !important;
+                padding-bottom: 24px;
+                animation: slideUpSheet 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            }
+
+            @keyframes slideUpSheet {
+                from {
+                    transform: translateY(100%);
+                }
+                to {
+                    transform: translateY(0);
+                }
+            }
+
+            /* Visual drag pill on mobile modal */
+            .detail-floating-modal::before {
+                content: '';
+                display: block;
+                width: 44px;
+                height: 5px;
+                background: #cbd5e1;
+                border-radius: 10px;
+                margin: 10px auto 4px auto;
+            }
+
+            .gmaps-grid-wrapper {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 6px;
+                max-height: 160px;
+            }
+
+            /* Lightbox Mobile Adjustments */
+            .lightbox-header {
+                padding: 12px 14px;
+            }
+
+            .lightbox-resto-name {
+                font-size: 0.95rem;
+                max-width: 140px;
+            }
+
+            .gmaps-btn-text {
+                display: none;
+            }
+
+            .lightbox-gmaps-link {
+                padding: 8px 10px;
+            }
+
+            .lightbox-body {
+                padding: 6px 8px;
+            }
+
+            .lightbox-nav-btn {
+                width: 44px;
+                height: 44px;
+                font-size: 1.15rem;
+            }
+
+            .lightbox-footer-filmstrip {
+                padding: 8px 10px;
+                gap: 6px;
+            }
+
+            .filmstrip-thumb {
+                width: 48px;
+                height: 36px;
+            }
+
+            .lightbox-image-stage img {
+                max-width: 96vw;
+                max-height: calc(100vh - 160px);
+            }
+
+            .map-floating-controls {
+                bottom: 80px;
+                right: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app-viewport">
+        <!-- Leaflet Map Container -->
+        <div id="map"></div>
+
+        <!-- Clean Top Navigation Header -->
+        <header class="app-header">
+            <div class="brand-box" id="btnBrandReset">
+                <div class="brand-icon-wrap">
+                    <i class="fa-solid fa-utensils"></i>
+                </div>
+                <div class="brand-title-wrap">
+                    <span class="brand-main-title">Eksplorasi Kuliner Sentul</span>
+                    <span class="brand-sub-title">9 Destinasi Rekomendasi Terpilih</span>
+                </div>
+            </div>
+
+            <!-- Search Input Bar -->
+            <div class="search-container">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="searchInput" class="app-search-input"
+                    placeholder="Cari nama restoran, menu, atau kategori...">
+            </div>
+
+            <!-- Header Actions -->
+            <div class="header-actions">
+                <button class="btn-header-tool active" id="btnToggleBuffer">
+                    <i class="fa-solid fa-bullseye"></i>
+                    <span>Buffer Radius</span>
+                </button>
+                <button class="btn-header-tool" id="btnToggleDrawer">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span>Panel Data</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Left Panels: Insight & Data List -->
+        <div class="left-floating-container" id="leftContainer">
+            <!-- Widget 1: Rangkuman Hasil Insight -->
+            <div class="panel-widget-card insight-widget">
+                <div class="insight-top-row">
+                    <div class="insight-title">
+                        <i class="fa-solid fa-chart-pie" style="color: #2563eb;"></i>
+                        Rangkuman Destinasi
+                    </div>
+                    <span class="insight-tag">9 Pilihan</span>
+                </div>
+                <div class="insight-metrics-grid">
+                    <div class="metric-box">
+                        <div class="metric-label">Destinasi</div>
+                        <div class="metric-value">9 Resto</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Rata-rata</div>
+                        <div class="metric-value">Rp48k/pax</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Top Rating</div>
+                        <div class="metric-value" style="color: #d97706;">⭐ 4.7</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Widget 2: Restaurant Cards List -->
+            <div class="panel-widget-card list-widget">
+                <div class="list-widget-header">
+                    <h3>Daftar Restoran Terpilih</h3>
+                    <span style="font-size: 11px; color: var(--gray-500); font-weight: 600;" id="badgeFilteredCount">9 Tempat</span>
+                </div>
+                <div class="list-scroll-view" id="listScrollContainer">
+                    <!-- Cards populated via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Floating Detail Card / Bottom Sheet -->
+        <div class="detail-floating-modal" id="mapidDetailCard">
+            <div class="modal-header-line">
+                <span class="pill-number-tag" id="modalNumberPill">#1</span>
+                <button class="btn-close-modal" id="btnModalClose" title="Tutup Modal" onclick="closeDetailModal(event)">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="modal-body-container">
+                <h3 class="modal-main-name" id="modalTitle">Nama Restoran</h3>
+                <div class="modal-cat-subtitle" id="modalCategory">Kategori</div>
+                <p class="modal-story-desc" id="modalDesc">Deskripsi restoran.</p>
+
+                <!-- CAROUSEL FOTO GOOGLE MAPS -->
+                <div class="modal-carousel-section">
+                    <div class="carousel-counter-tag" id="carouselCounter">1 / 8</div>
+                    <button type="button" class="carousel-nav-btn carousel-prev-btn" id="btnSlidePrev" title="Foto Sebelumnya" onclick="navigateCarousel(-1, event)">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <div class="carousel-track-container" id="carouselTrack">
+                        <!-- Slides populated via JS -->
+                    </div>
+                    <button type="button" class="carousel-nav-btn carousel-next-btn" id="btnSlideNext" title="Foto Selanjutnya" onclick="navigateCarousel(1, event)">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                    <div class="carousel-dots-wrap" id="carouselDots">
+                        <!-- Dots populated via JS -->
+                    </div>
+                </div>
+
+                <!-- GALERI FOTO GOOGLE MAPS (GRID THUMBNAIL INTERAKTIF) -->
+                <div class="gmaps-gallery-container">
+                    <div class="gmaps-gallery-header">
+                        <span class="gmaps-gallery-heading">
+                            <i class="fa-solid fa-camera-retro" style="color: #2563eb;"></i> Galeri Google Maps
+                        </span>
+                        <span class="gmaps-gallery-count" id="galleryCountTag">0 Foto</span>
+                    </div>
+                    <div class="gmaps-grid-wrapper" id="gmapsPhotoGrid">
+                        <!-- Grid items dynamically rendered via JS -->
+                    </div>
+                </div>
+
+                <!-- Price Panel -->
+                <div class="modal-price-panel">
+                    <div>
+                        <div class="price-col-title">Rentang Harga Menu:</div>
+                        <div class="price-val-bold" id="modalPriceRange">Rp25.000 – Rp75.000</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div class="price-col-title">Estimasi / Pax:</div>
+                        <div class="price-est-highlight" id="modalPriceEst">~ Rp48.000</div>
+                    </div>
+                </div>
+
+                <div class="modal-info-row">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <span id="modalAddress">Alamat Lengkap</span>
+                </div>
+                <div class="modal-info-row">
+                    <i class="fa-solid fa-star" style="color: #f59e0b;"></i>
+                    <span id="modalRatingText">4.5</span>
+                </div>
+
+                <!-- Footer with Contact & Actions -->
+                <div class="modal-bottom-profile">
+                    <div class="profile-side-left">
+                        <div class="contact-avatar-circle">
+                            <i class="fa-solid fa-user-tie"></i>
+                        </div>
+                        <div>
+                            <div class="contact-name-txt" id="modalContactPerson">Kontak Reservasi</div>
+                            <div class="contact-sub-txt" id="modalContactPhone">0813-XXXX-XXXX</div>
+                        </div>
+                    </div>
+                    <div class="actions-side-right">
+                        <a href="#" target="_blank" class="btn-contact-action" id="modalWaBtn">
+                            <i class="fa-brands fa-whatsapp"></i> Chat WA
+                        </a>
+                        <a href="#" target="_blank" class="btn-dir-action" id="modalDirBtn" title="Buka di Google Maps">
+                            <i class="fa-solid fa-location-arrow"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floating Map Controls -->
+        <div class="map-floating-controls">
+            <button class="btn-map-control" id="btnZoomIn" title="Perbesar Peta">
+                <i class="fa-solid fa-plus"></i>
+            </button>
+            <button class="btn-map-control" id="btnZoomOut" title="Perkecil Peta">
+                <i class="fa-solid fa-minus"></i>
+            </button>
+            <button class="btn-map-control" id="btnFitAll" title="Tampilkan Semua Lokasi">
+                <i class="fa-solid fa-expand"></i>
+            </button>
+            <button class="btn-map-control" id="btnLayerToggle" title="Ganti Tampilan Peta">
+                <i class="fa-solid fa-layer-group"></i>
+            </button>
+        </div>
+
+        <!-- FULLSCREEN LIGHTBOX / GOOGLE MAPS PHOTO VIEWER (PLACED BEFORE SCRIPT) -->
+        <div class="gmaps-lightbox-overlay" id="gmapsLightbox" onclick="handleLightboxBackdropClick(event)">
+            <div class="lightbox-header">
+                <div class="lightbox-title-wrap">
+                    <span class="lightbox-pin-icon"><i class="fa-solid fa-location-dot"></i></span>
+                    <span class="lightbox-resto-name" id="lightboxRestoName">Nama Restoran</span>
+                    <span class="lightbox-counter-badge" id="lightboxCounter">1 / 8</span>
+                </div>
+                <div class="lightbox-actions">
+                    <a href="#" target="_blank" class="lightbox-gmaps-link" id="lightboxGmapsLink" title="Buka di Google Maps">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i> <span class="gmaps-btn-text">Buka di Google Maps</span>
+                    </a>
+                    <button type="button" class="lightbox-close-btn" id="btnCloseLightbox" onclick="closeGmapsLightbox(event)" title="Tutup (Esc)">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="lightbox-body">
+                <button type="button" class="lightbox-nav-btn lightbox-prev-btn" id="btnLightboxPrev" onclick="lightboxPrev(event)" title="Foto Sebelumnya (←)">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <div class="lightbox-image-stage" id="lightboxStage">
+                    <img src="" alt="Google Maps Photo" id="lightboxMainImg" referrerpolicy="no-referrer">
+                </div>
+                <button type="button" class="lightbox-nav-btn lightbox-next-btn" id="btnLightboxNext" onclick="lightboxNext(event)" title="Foto Selanjutnya (→)">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+            <div class="lightbox-footer-filmstrip" id="lightboxFilmstrip">
+                <!-- Filmstrip thumbs -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        // Data 9 Restoran Terverifikasi dengan Kontak, Koordinat Presisi & Link Google Maps
+        var restaurantsData = [
+        {
+                "id": 1,
+                "name": "RM. Ayam Bakar Pak Atok",
+                "category": "Ayam Bakar & Khas Sunda",
+                "price_est": "Rp48.000",
+                "price_range": "Rp25.000 – Rp75.000",
+                "price_num": 48000,
+                "price_level": "mid",
+                "address": "Jl. Alternatif Sentul, RT.01/RW.01, Babakan Madang, Kec. Babakan Madang, Kabupaten Bogor",
+                "lat": -6.5313632,
+                "lng": 106.8518774,
+                "phone": "0813-8591-4505",
+                "phone_alt": "(021) 87953339",
+                "contact_person": "Reservasi Pak Atok (WA)",
+                "status": "Belum Dihubungi",
+                "gmaps_rating": "4.4",
+                "gmaps_reviews": "898+",
+                "image_thumb": "https://lh3.googleusercontent.com/grass-cs/ACvplmPAM1Uox1dyejdRhODtczEall7bl27X0hNP28Rj6M2BEJ8HmGF60Wa4cBpiq9-T_WvdAotG7o7NsDa4-gxuj96CTF7S8djhexFBFCgcGgUEhqT9O8-87eAY3hQRzI2zgaD6kr2euQ=w800-h600-k-no",
+                "gmaps_url": "https://maps.app.goo.gl/Ht6VtFeijAovrVxr6",
+                "desc": "Spesialis ayam kampung bakar legendaris dengan racikan bumbu manis gurih meresap sampai ke tulang, disajikan dengan sambal terasi khas dan lalapan segar.",
+                "photos": [
+                        "https://lh3.googleusercontent.com/grass-cs/ACvplmPAM1Uox1dyejdRhODtczEall7bl27X0hNP28Rj6M2BEJ8HmGF60Wa4cBpiq9-T_WvdAotG7o7NsDa4-gxuj96CTF7S8djhexFBFCgcGgUEhqT9O8-87eAY3hQRzI2zgaD6kr2euQ=w800-h600-k-no",
+                        "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWk_mEojRFIrU8ywlrQQYcduYiJcjLhXOVXhTXs4ii50jh8yA7qZPXZYVQxRBWy0AclB7Z0CPD7Vqc4tQXWy6oCXW5nrAIGdqN6HX4rJqTzKsB4-z2QeU6Ch2qkZGFxOLcxJBniwNw=w800-h600-k-no",
+                        "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWlGUTggnO3GdKBzfjOr7cFl-rXFNZjnQm-WY9PuF8x86YNObt-feULCgdCB5fOdqUdg5lDq0FE3anK3V_XF-hP6Un1lwrBKMWgE4cHwClzno_ECMPQSengOPuWt76Ry5tZiX-UFqQ=w800-h600-k-no",
+                        "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWnR8TAaMcoKt2CkUcK-Hdc_u0T1vlzGchiaXwkL3BrdGTZD13yFvVQesTU3fF0gun6z1d66KqsVXdA_Ht_8aDrsykHgV2v7h8Cy71Zc0C-qfeCi-5x_v6fnTBGw3KSucuHygpJYxxINp_w=w800-h600-k-no",
+                        "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWmvysG6Fayy7Ft872tt-3mItJmnQsVevlctnju2l0hFJWaXLz3c2X1j3kFKge94BH06hi70BeqTC93Ru1LUGOMZlfeXnvnXOFHbMLsX0bUJw1Oo6E4_yIrwnnzpjItjm6173Ln0s9qwaqYb=w800-h600-k-no",
+                        "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWlnKKAcavc-OmxkzVmccF5lhQAWyTiX3fI50pi-0CEaqrjKU6kYzm9uSWG--rxMSCJuX67BmXzY_fm2eQc-TeRDy5ILaEU0-CzMedVl-fcqVue2yVvHatWV_WlFW_WymLIMQGeonGBJZl5d=w800-h600-k-no",
+                        "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWkgK6C6ShQiXBfdtxHXqzigHERBiXR6kRJ4ofG5X21bR1taivs-oDluRI7AJXKJM2iXUKl0GSQWL2DYBdSPDpDu6nfrhw2o2xjNwW_q-6gHQhaazJ99vIBOz_Gqjs5EPg8m9jGwEL-z1wC4=w800-h600-k-no",
+                        "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWm_JXctANld7E9bSMV3YUcLalkv_68f8r2Fx0mEaZRzdNxc7fqC1h_hqEeyv8CavGnr5SefevWecWsiS4Fo-U0JBPK7bM6sWfUcY90wbETaxkU-fcnSpWIY2dUB7ggWcIjTVW9=w800-h600-k-no"
+                ],
+                "contact_type": "wa",
+                "raw_phone": "081385914505"
+        },
+        {
+                "id": 2,
+                "name": "SundaYuk! Restoran Sunda",
+                "category": "Khas Sunda & Prasmanan",
+                "price_est": "Rp35.000",
+                "price_range": "Rp20.000 – Rp55.000",
+                "price_num": 35000,
+                "price_level": "budget",
+                "address": "Jl. Alternatif Sentul No.29, Cijayanti, Babakan Madang, Bogor",
+                "lat": -6.5431814,
+                "lng": 106.8523997,
+                "phone": "0895-3645-26025",
+                "phone_alt": "0813-9876-5432",
+                "contact_person": "Reservasi SundaYuk! (WA)",
+                "status": "Dihubungi",
+                "gmaps_rating": "4.6",
+                "gmaps_reviews": "1.120+",
+                "image_thumb": "https://lh3.googleusercontent.com/grass-cs/AABkmLfh7ppN_rAWB5f2GmEcb-eTmRPxQIVSy1xhNmwZHK-WJdWo5_NnWurOSrkyvaQed_jtEx5HrukBLzd-aus3OvnZvjsBTi0e9e8a8SxYZ8EaXtfJdeivywW2XKj_qg1FUBJUuDc6=w800-h600-k-no",
+                "gmaps_url": "https://maps.app.goo.gl/zjwVooZofYHFBCx78",
+                "desc": "Konsep prasmanan Sunda modern dengan aneka lauk tradisional, sambal dadak segar, pepes, dan lalapan gratis sepuasnya.",
+                "photos": [
+                        "https://lh3.googleusercontent.com/grass-cs/AABkmLfh7ppN_rAWB5f2GmEcb-eTmRPxQIVSy1xhNmwZHK-WJdWo5_NnWurOSrkyvaQed_jtEx5HrukBLzd-aus3OvnZvjsBTi0e9e8a8SxYZ8EaXtfJdeivywW2XKj_qg1FUBJUuDc6=w800-h600-k-no",
+                        "https://lh3.googleusercontent.com/gps-cs-s/ANWiy9Sz6GlPCjC_v_63NAg7Qntp5D9lz14X9YZoyKbswBlpQQI7n0Es0Ap0DJOqFgP680Runzw9zhp2MUAvmtW_bNJxOmuDUkGPvW-Of1W3yJTV_OKiD3C26ifYZSa1UxY7TaP-ywXJYApy0MEq=w800-h600-k-no",
+                        "https://lh3.googleusercontent.com/gps-cs-s/ANWiy9RVtBh_MRLnOcHxtD399MZzOqqLsGuLniakgWSNum1WJWfZT2JzjnimreAhXeHPb4bYA9YMJWx1Cm3sr7HfezRDPMB023cUW66NGG1Qpjv7dN6zKo8akuz1WQZPfu4YjA=w800-h600-k-no",
+                        "https://lh3.googleusercontent.com/gps-cs-s/ANWiy9TBkrMRCHrE2Qc63K9GuKbEhIby2ImB0NsLIxV-4CP-8uKxUqU0HyDWwn1JUlD922MvO2BOeinMOB0-euHZ3xXbrKMlFKBLXbLBnx7F3HQSb6T7uCJaVuT0dw97jhb18-oxEqF6zDwNSK8=w800-h600-k-no"
+                ],
+                "contact_type": "wa",
+                "raw_phone": "0895364526025"
+        },
+        {
+                "id": 3,
+                "name": "Rumah Makan Mang Kabayan",
+                "category": "Khas Sunda & Seafood Saung",
+                "price_est": "Rp62.000",
+                "price_range": "Rp35.000 – Rp110.000",
+                "price_num": 62000,
+                "price_level": "mid",
+                "address": "Kawasan Sentul City, Jl. Ir H Juanda No. 8, Bojong Koneng, Kec. Babakan Madang, Kabupaten Bogor",
+                "lat": -6.5683418,
+                "lng": 106.845841,
+                "phone": "0822-1054-1560",
+                "phone_alt": "0812-1133-311",
+                "contact_person": "Reservasi Mang Kabayan (WA)",
+                "status": "Belum Dihubungi",
+                "gmaps_rating": "4.5",
+                "gmaps_reviews": "2.680+",
+                "image_thumb": "https://lh3.googleusercontent.com/grass-cs/AABkmLcTCjh7stsN3NeU-yIy71Ef2lUwI1PUQmn-yv3gDQLvQ8VryWoPaqeJOxX5ZZ65Mj24hDQvL-MOF7ys0lnyuco6ARtornLXpLOEGYlzxXY8WZFhLRNniDHoBqrp5ylQsJtynWrlE53XWa4=w800-h600-k-no",
+                "gmaps_url": "https://maps.app.goo.gl/Rspgx6QY8QMYM58b8",
+                "desc": "Restoran keluarga Sunda bergaya tradisional dengan saung-saung lesehan di atas kolam ikan. Gurame terbang dan nasi timbel komplit jadi favorit.",
+                "photos": [
+                        "https://lh3.googleusercontent.com/grass-cs/AABkmLcTCjh7stsN3NeU-yIy71Ef2lUwI1PUQmn-yv3gDQLvQ8VryWoPaqeJOxX5ZZ65Mj24hDQvL-MOF7ys0lnyuco6ARtornLXpLOEGYlzxXY8WZFhLRNniDHoBqrp5ylQsJtynWrlE53XWa4=w800-h600-k-no",
+                        "https://lh3.googleusercontent.com/gps-cs-s/ANWiy9Slune5orM8zkBHF8PBhTufHdqT0Uxi6gx4PeWvli32aSV6oRYIKdRuMCT3sPxLIJ8BYR8ko9c-WzqKeedbF5Gc3RTG-E7Ri_M8-wJm9iT8W1ry4S4eBP5lfAv6_3COEoyLvwFH=w800-h600-k-no",
+                        "https://lh3.googleusercontent.com/gps-cs-s/ANWiy9RNwHwJJgzYoxpMGtifuP6XnLu5fph0hmmXeRWB0c6lamMfCaRsdr50BNym0dR1KgihEu6WR1fIptrrhd1a8Lsj6pNqYWn3esF2YtGVuRaMU3FNOU4YEue4vDwcM3zLWldzm4LCW05sAF0p=w800-h600-k-no",
+                        "https://lh3.googleusercontent.com/gps-cs-s/ANWiy9Sd0JUfavkf5MgBeK2Oc40jcsOeQnlgiod1T8SwIT1aA8FWkoS4u85LtEAR4kTBN51Tq5JaVNi6FgDbSOyXOMw5vA0o0GwywocsApyBGIkMxlehppT7Kaw4butx3RUOWTzfcWEF8WG8TikG=w800-h600-k-no",
+                        "https://lh3.googleusercontent.com/gps-cs-s/ANWiy9RfYs5IYsD-oADz7o_0zm1L-N4e9-VzFp7a7AJ3N6bflHCW98MJto7aWZYCL4WrKTdndQLbQIvP51TIRvb9cnCDrpdb2RFc1dCjeJCFiD3UsBVB4L-wG88z5HvSXKXYOZV4zWaiSm36ry9q=w800-h600-k-no"
+                ],
+                "contact_type": "wa",
+                "raw_phone": "082210541560"
+        },
+        {
+                "id": 4,
+                "name": "Warung Temon (Ahpoong)",
+                "category": "Kuliner Tradisional & Riverside",
+                "price_est": "Rp32.000",
+                "price_range": "Rp18.000 – Rp48.000",
+                "price_num": 32000,
+                "price_level": "budget",
+                "address": "Pasar Ah Poong, Sentul City, Jl. MH. Thamrin Kav.8, Babakan Madang",
+                "lat": -6.56905,
+                "lng": 106.8453266,
+                "phone": "0813-8442-6551",
+                "phone_alt": "-",
+                "contact_person": "Pengelola Stand (WA)",
+                "status": "Belum Dihubungi",
+                "gmaps_rating": "4.3",
+                "gmaps_reviews": "640+",
+                "image_thumb": "https://lh3.googleusercontent.com/grass-cs/AABkmLdwFtrvOtvxFlhQaMaRjZXiL1A-Skd7sww3p04-KKFh4X0u7lNC-RuiXWTev_-xGQWrhj_rZ7K3ark8mL6zBO6exDOpeZFXZemCSNrSWbm2SjO3QA1BdHZTjMF9lHXdanQn-jp-EUIJdXx7=w800-h600-k-no",
+                "gmaps_url": "https://maps.app.goo.gl/9y6mzqLLMVoDFDJR9",
+                "desc": "Sensasi bersantap santai di tepi aliran sungai Pasar Ah Poong Sentul. Menyediakan olahan ayam goreng, nasi uduk gurih, dan wedang ronde.",
+                "photos": [
+                        "https://lh3.googleusercontent.com/grass-cs/AABkmLdwFtrvOtvxFlhQaMaRjZXiL1A-Skd7sww3p04-KKFh4X0u7lNC-RuiXWTev_-xGQWrhj_rZ7K3ark8mL6zBO6exDOpeZFXZemCSNrSWbm2SjO3QA1BdHZTjMF9lHXdanQn-jp-EUIJdXx7=w800-h600-k-no",
+                        "https://lh3.googleusercontent.com/gps-cs-s/ANWiy9Qq8UuWKIEbDfN6YLjc5VGGkTqzW2FbPhziQiVRXyJ0aEuAFbjrg-xrVX8rRVlSRgFYkyvAEOdvdMKQ7xQGc9Iqwu2yxDU3MFA3RnZ50f2XNlr6-miCppBT2M8UgH9gTB73eqol6MiIkQCM=w800-h600-k-no",
+                        "https://lh3.googleusercontent.com/gps-cs-s/ANWiy9Q2lm-iTaVCcpEif8XNmpuofmHahVkt0MVO4e5K72Z7ojZaPHsqE_OpAGiFrjM8tB_ioIQxoGd5Kp1ep7T4YVkXiHMFNwN-IeHqC7MTNad8rbNiYYKhfeoz0o7oY985wtpTSBa695U6Kg89=w800-h600-k-no",
+                        "https://lh3.googleusercontent.com/gps-cs-s/ANWiy9RQX3_gkfiOWdfXVmJYRgPCYWvVZQtBy7tMmPS4zp1wK9VEuqpvvSJovz7WaPVY1HsCNcp_qvEUDIO8qvC6d2mhKavWL9PCoWBheeE4prT2kyzINVQffxhQSmS69gp5_jFiSS9Mhw=w800-h600-k-no"
+                ],
+                "contact_type": "wa",
+                "raw_phone": "081384426551"
+        },
+        {
+                "id": 5,
+                "name": "Restoran Tumbar Jinten",
+                "category": "Sunda Rempah & Alam Terbuka",
+                "price_est": "Rp55.000",
+                "price_range": "Rp30.000 – Rp90.000",
+                "price_num": 55000,
+                "price_level": "mid",
+                "address": "Komp. Grand Sentul City Blok C4-1 No. 5, Jl. Sentul Raya, Cadas Ngampar, Sukaraja",
+                "lat": -6.5663743,
+                "lng": 106.8413893,
+                "phone": "(021) 2909-9060",
+                "phone_alt": "0818-0812-4455",
+                "contact_person": "Front Office (Call Only)",
+                "status": "Dihubungi",
+                "gmaps_rating": "4.4",
+                "gmaps_reviews": "1.740+",
+                "image_thumb": "https://lh3.googleusercontent.com/grass-cs/ACvplmMhC6g3MZ9-6Bz1bb1uads-5nnDz8UUGoRyUKdawwmGscq4USGRw6ynXjnvd8WIKm4OpQ97NOivjKZMVhW-eoDhbZxcNK2_D0VWwXJ6InxGJvCuOIuzRNZzABxW6RxE26Q9c8Ez=w800-h600-k-no",
+                "gmaps_url": "https://maps.app.goo.gl/vhfwH1H4PYwYZNAQA",
+                "desc": "Restoran bernuansa taman asri dengan sajian resep rempah nusantara yang harum, kolam ikan luas, dan playground ramah anak.",
+                "photos": [
+                        "https://lh3.googleusercontent.com/grass-cs/ACvplmMhC6g3MZ9-6Bz1bb1uads-5nnDz8UUGoRyUKdawwmGscq4USGRw6ynXjnvd8WIKm4OpQ97NOivjKZMVhW-eoDhbZxcNK2_D0VWwXJ6InxGJvCuOIuzRNZzABxW6RxE26Q9c8Ez=w800-h600-k-no",
+                        "https://lh3.googleusercontent.com/gps-cs-s/ANWiy9R8OeajiFwV9j8to2cf-iGzPDgSodl_nA8hrN3eL1fHgRW5bS9R_SH4BGGjfk_2mJR-3iq_pxE6vsgZa1p_9-CpdNwsDpY5MiSS25GHp0FmrXveCFkcYC5qW5f9R_h535cqAfFl=w800-h600-k-no",
+                        "https://lh3.googleusercontent.com/gps-cs-s/ANWiy9T7obptquMwMoRO6CpLCPqK04QrdVOBhC_XJyS2ayTUcILnKcnKKOrDCK4HU5f23-r9zetceVjAg_P55n5Kk7ppcXrN26IEQbVyA0oFDWJbwtIaV2LK2R1wpOCVWiuUJn2A50n9ywGUyw8=w800-h600-k-no",
+                        "https://lh3.googleusercontent.com/gps-cs-s/ANWiy9TW9TIWo-BiWe88RZRUvBMGA_zsNhZcMUSIsRMHpgPFxzZQi9ZkXxYqFrf9Awd1v368jdS7TqM8ENP3p9ZDD7b5cSjmbYGfqoqqVkDx2XEoYYhjHZyn385CJpOROWTTsEhw1RxdCC04DH05=w800-h600-k-no"
+                ],
+                "contact_type": "call",
+                "raw_phone": "02129099060"
+        },
+        {
+                "id": 6,
+                "name": "Bumi Aki Signature",
+                "category": "Sundanese Heritage & Premium Dining",
+                "price_est": "Rp88.000",
+                "price_range": "Rp50.000 – Rp175.000",
+                "price_num": 88000,
+                "price_level": "fine",
+                "address": "Jl. Sentul Nirwana No.1, Bojong Koneng, Babakan Madang, Bogor",
+                "lat": -6.5670746,
+                "lng": 106.862246,
+                "phone": "0859-2558-0815",
+                "phone_alt": "0811-1903-888",
+                "contact_person": "Reservasi Bumi Aki (WA)",
+                "status": "Belum Dihubungi",
+                "gmaps_rating": "4.7",
+                "gmaps_reviews": "10.950+",
+                "image_thumb": "https://lh3.googleusercontent.com/grass-cs/ACvplmOGETogeLNvkyXO80W07vgwdBoL-Qg-UhLJM5LyuwJC_yvowx8ow-fREcBiPQMY1YcM91-HOFok7ZB6Hcy36BH5Yaa_OEHE7SuL2-sd9T6h1XY-U50KPyDz9ixGtPG2YnU14CtUEBZ53sQ=w800-h600-k-no",
+                "gmaps_url": "https://maps.app.goo.gl/wQoTEvmyfGCDBPxe6",
+                "desc": "Ikon restoran Sunda legendaris bertaraf premium dengan panorama lembah Sentul yang megah, sate kambing empuk legendaris, dan pelayanan bintang lima.",
+                "photos": [
+                        "https://lh3.googleusercontent.com/grass-cs/ACvplmOGETogeLNvkyXO80W07vgwdBoL-Qg-UhLJM5LyuwJC_yvowx8ow-fREcBiPQMY1YcM91-HOFok7ZB6Hcy36BH5Yaa_OEHE7SuL2-sd9T6h1XY-U50KPyDz9ixGtPG2YnU14CtUEBZ53sQ=w800-h600-k-no",
+                        "https://lh3.googleusercontent.com/gps-cs-s/ANWiy9REZoLrxcrWJ_QsV4vWWhThP_NDfSXJobNkISS2gTs5chXNQN7ABMzHv1UJjOKKFSv2tuYimhLPpCkPsqbOFRiqNutF61w0KgB-LcgPF3-oBrgmHfOnwCTAN8pIcvHwrEH8joehtkUjxx11=w800-h600-k-no",
+                        "https://lh3.googleusercontent.com/gps-cs-s/ANWiy9S8oH7KIxQ0IA6lOxQnWc4_3GFx_n9Aau6LIjUdtSW2TDQIoqzI34xQT7F6zdZ7kAP4fWgnbwMPplKeI29qUp9dMvjdtCo3OlaJLO4nmC9qvd_uQOUDxB8woNTpS2MMn5tGi2sTe77nd_Y=w800-h600-k-no",
+                        "https://lh3.googleusercontent.com/gps-cs-s/ANWiy9TQIYF7U1IrIxpwiWJYdyXoxJjLwLvtrW4S5OJxSg2XUj61QEZ8HivforPsWySbNggw6VDVqAClYdTIfAeL4RYK4Rca6RW_a0pe_V4cSR3570Hm5LerPaq-Lgvy20U8hfDJ8zo8FAOIzQy_=w800-h600-k-no"
+                ],
+                "contact_type": "wa",
+                "raw_phone": "085925580815"
+        },
+        {
+                "id": 7,
+                "name": "RM Abah Sentul",
+                "category": "Ayam Kampung Goreng & Bakar",
+                "price_est": "Rp42.000",
+                "price_range": "Rp25.000 – Rp65.000",
+                "price_num": 42000,
+                "price_level": "budget",
+                "address": "Jl. MH Thamrin Kav 08, Citaringgul, Babakan Madang, Bogor",
+                "lat": -6.5332441,
+                "lng": 106.8531239,
+                "phone": "0852-8292-3271",
+                "phone_alt": "-",
+                "contact_person": "Pemesanan RM Abah (WA)",
+                "status": "Belum Dihubungi",
+                "gmaps_rating": "4.4",
+                "gmaps_reviews": "780+",
+                "image_thumb": "https://lh3.googleusercontent.com/grass-cs/ACvplmMQWZEJHOt6YufylhtK1OVBde-1VXgb9jOBki6TZUY5xsqOUJGuGV7fF4cQNNmOxI80mxkcpnHIkSyCblQbA5HdVgGWd7FD1WTJKZCBpAxi2IW_1tGQM8UXUz8XU8-o9HgpwnOCvcNJOdQs=w800-h600-k-no",
+                "gmaps_url": "https://maps.app.goo.gl/H4BEBsnLcBwRLUWT7",
+                "desc": "Pilihan favorit warga lokal dan goweser untuk sarapan dan makan siang dengan menu andalan ayam kampung goreng empuk dan sayur asem segar.",
+                "photos": [
+                        "https://lh3.googleusercontent.com/grass-cs/ACvplmMQWZEJHOt6YufylhtK1OVBde-1VXgb9jOBki6TZUY5xsqOUJGuGV7fF4cQNNmOxI80mxkcpnHIkSyCblQbA5HdVgGWd7FD1WTJKZCBpAxi2IW_1tGQM8UXUz8XU8-o9HgpwnOCvcNJOdQs=w800-h600-k-no",
+                        "https://lh3.googleusercontent.com/gps-cs-s/ANWiy9SHKCcRct8yQvB88-SQ3jd1Yf3r6K85yROnGgD-62MG6yZ6264ffJ2IuUIEubnhS-KtiDseg2aEdKNe3unMfIzLnsgqccmE1jLWldubqsPF-tI2fPEgUqOtBpQSy3HC4GjDpt6nbg=w800-h600-k-no",
+                        "https://lh3.googleusercontent.com/gps-cs-s/ANWiy9QZwJMS1kKp1o6oQt2sSkjQ0Iw1AOtf1hW1EtJA89cTHqTPr72VLOuGL7kWJzVYnJ0nHzO_1C7Ge4xEXXMKQFCMs8W972gHsJg-UyRGXUPUFIsb4A_PND2cO1twBisqzW8QDOcdwaIvUuOp=w800-h600-k-no",
+                        "https://lh3.googleusercontent.com/gps-cs-s/ANWiy9RfKbqPD4brBMzLETQjVUkDJ1saTA7UAGQhVhAyPRVphXMbxyk6tVgkl3-Bq8UGJBNIufBcBzCh3cP6ZdIZpuZG3Og_FwyTgjFpay62e4p2U6zi_h2jW3n7LaDA2yGMGaSXXqo0VItBuEK0=w800-h600-k-no"
+                ],
+                "contact_type": "wa",
+                "raw_phone": "085282923271"
+        },
+        {
+                "id": 8,
+                "name": "Kampoeng Koneng Sentul",
+                "category": "Masakan Nusantara & Edu-Wisata Alam",
+                "price_est": "Rp68.000",
+                "price_range": "Rp40.000 – Rp120.000",
+                "price_num": 68000,
+                "price_level": "mid",
+                "address": "Jl. Tapos RT.03/RW.04, Bojong Koneng, Sentul Selatan, Bogor",
+                "lat": -6.5935601,
+                "lng": 106.8883219,
+                "phone": "0878-7831-1176",
+                "phone_alt": "0812-8877-3321",
+                "contact_person": "Reservasi Kampoeng Koneng (WA)",
+                "status": "Dihubungi",
+                "gmaps_rating": "4.6",
+                "gmaps_reviews": "4.200+",
+                "image_thumb": "https://lh3.googleusercontent.com/grass-cs/ACvplmMpxvP5eDHyCDz7YyulRn23_HtWy2uBqJz2GjzKxf-8Iz0lopaN2cIbYTYTQGVrP3ZxpsjKsgKJyIKP9SykP699Shk2KK3gb5UcDaNWKQ6Dy1bRgea6vO_UGslKIivX-8b_H_eE=w800-h600-k-no",
+                "gmaps_url": "https://maps.app.goo.gl/7yBmD3Z7jhzQxNri8",
+                "desc": "Konsep restoran pedesaan di atas bukit dengan sate tulang legendaris, nasi liwet kastrol, kebun binatang mini, dan aktivitas melukis caping untuk anak-anak.",
+                "photos": [
+                        "https://lh3.googleusercontent.com/grass-cs/ACvplmMpxvP5eDHyCDz7YyulRn23_HtWy2uBqJz2GjzKxf-8Iz0lopaN2cIbYTYTQGVrP3ZxpsjKsgKJyIKP9SykP699Shk2KK3gb5UcDaNWKQ6Dy1bRgea6vO_UGslKIivX-8b_H_eE=w800-h600-k-no",
+                        "https://lh3.googleusercontent.com/gps-cs-s/ANWiy9TVhBQEVmUR5ZCP4WXGUhEAdIyao73vzHf_8Gf_rCPazWSYwCmvh_PDk9ZniKJ4IgFvGG3UlTFEZ8TRkMOmzXCM_N23Wc_wCLXaBv5ln6ectIv8WqDqpE_PKeb3TBtz0UhrbsYxqu8mxXzz=w800-h600-k-no",
+                        "https://lh3.googleusercontent.com/gps-cs-s/ANWiy9Qc2U6U_Ep_gRVaLlmd-x4ikKMDmqP_6RPX6sISY8Bf8NYJCyX6ZvNdRShardevgedNXvgP3n1CCI3y2K02EgX7cPgbqu02loxWvAeWs_Pv2HGphG1JDLdwuZn-4OFon2Wzm9y3Ug=w800-h600-k-no",
+                        "https://lh3.googleusercontent.com/gps-cs-s/ANWiy9Qu_4BL43KmTzEyOcCHkYjSg_ACIjQxHQjJ93JZVBYWKlf0UiASIxGCz0v2K0FhjPMJgFBpwNvonsoUfRHMQbFg_h530y9PzzloaOhASEjMXx25s3eWi4oyaZlYVDnxCmRPATVt=w800-h600-k-no"
+                ],
+                "contact_type": "wa",
+                "raw_phone": "087878311176"
+        },
+        {
+                "id": 9,
+                "name": "Bunga Kampoeng",
+                "category": "Masakan Sunda & Wisata Sentul",
+                "price_est": "Rp45.000",
+                "price_range": "Rp25.000 – Rp70.000",
+                "price_num": 45000,
+                "price_level": "budget",
+                "address": "Jl. Raya Gn. Pancar, Karang Tengah, Kp. Blok Dukuh RT.01/RW.13, Sentul, Kec. Babakan Madang, Kab. Bogor 16810",
+                "lat": -6.5758394,
+                "lng": 106.8936433,
+                "phone": "0813-8909-0088",
+                "phone_alt": "-",
+                "contact_person": "Pengelola Bunga Kampoeng (WA)",
+                "status": "Belum Dihubungi",
+                "gmaps_rating": "4.5",
+                "gmaps_reviews": "180+",
+                "image_thumb": "https://lh3.googleusercontent.com/grass-cs/ACvplmPs6cfiWtGrbH2NHhsEUSD9U7y80sN8cqZhW-lmtF2iivf0m4wyZgtUxa8iZnrFX13_Ju4kfWFJ-w3C4pFzpg1jlSJt5foFFfXYICR4E_cINLxoLA-1mLeRVUaUhbSYJbtd41p72WkzEhV-=w800-h600-k-no",
+                "gmaps_url": "https://maps.app.goo.gl/k1kb65SdCRyMNDGf8",
+                "desc": "Nuansa alam pedesaan Gunung Pancar yang tenang dan asri. Menyajikan masakan Sunda otentik, nasi liwet komplit, dan suasana santai.",
+                "photos": [
+                        "https://lh3.googleusercontent.com/grass-cs/ACvplmPs6cfiWtGrbH2NHhsEUSD9U7y80sN8cqZhW-lmtF2iivf0m4wyZgtUxa8iZnrFX13_Ju4kfWFJ-w3C4pFzpg1jlSJt5foFFfXYICR4E_cINLxoLA-1mLeRVUaUhbSYJbtd41p72WkzEhV-=w800-h600-k-no",
+                        "https://lh3.googleusercontent.com/gps-cs-s/ANWiy9S_9UXWfzC3icqa2k67wiJatsL_-ESsXwTvVZhSQxfjRfI8xi7c_kBG8JHxYGiyC-HTPtZJlxOGCkSJ_RDGzXM14DLQYc98anDhOqgJ4SOSypt8oWo_HW4qbmdtmVgjdyx7gpGxMmkSRWc8=w800-h600-k-no",
+                        "https://lh3.googleusercontent.com/gps-cs-s/ANWiy9RWoah1wghe-UMOrm-0tDaUri2ZMg-EiEMisIPv3-86msFnWBrKmIw_zGIQrDuAThAet99DwD_2jeS0XD0Dgogrqe_D9mwufJYjyN6SZ-tdCa8iYzNfoRP2_O1M1B51eeldevGm2IllQL7w=w800-h600-k-no",
+                        "https://lh3.googleusercontent.com/gps-cs-s/ANWiy9QIUtPdCuahrfIdWVua4338nV4Ut0kaSAkPnJI1JA8A7kx4-zqKecn0hrmXdx1aBn4oh2xwAYqei0BD4xuVBTtPt6m5ywv7XN7Xs8vq0Jb-Z583pBXxH-bnr69zzkg7jjDyWlUdacrMQj4H=w800-h600-k-no",
+                        "https://lh3.googleusercontent.com/gps-cs-s/ANWiy9RLMN3W47mwhL6FnOmtE2OrvN8qffyJu3AXzZOL587CeBr8ZPRFYNl1kwekSRemV9mLxvjn4_EevFGH3GfSQE168aquRukvoZ4v7wIaVP1pcKRYKwg3EOpYzji1b6q9ybkGeaxeZtQfO3gv=w800-h600-k-no"
+                ],
+                "contact_type": "wa",
+                "raw_phone": "081389090088"
+        }
+];
+
+        // Inisialisasi Peta
+        var map = L.map("map", {
+            center: [-6.558, 106.862],
+            zoom: 13,
+            zoomControl: false
+        });
+
+        // Layer Peta
+        var tileGoogle = L.tileLayer("https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}", {
+            maxZoom: 20,
+            attribution: "&copy; Google Maps"
+        }).addTo(map);
+
+        var tileOSM = L.tileLayer("https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png", {
+            maxZoom: 20,
+            attribution: "&copy; OpenStreetMap"
+        });
+
+        var tileEsri = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+            maxZoom: 19,
+            attribution: "&copy; Esri World Imagery"
+        });
+
+        var layers = [tileGoogle, tileOSM, tileEsri];
+        var layerIndex = 0;
+
+        var markersGroup = L.featureGroup().addTo(map);
+        var bufferCirclesGroup = L.featureGroup().addTo(map);
+        var showBuffers = true;
+
+        var currentSlideIndex = 0;
+        var totalSlides = 0;
+        var activeLightboxPhotos = [];
+        var activeLightboxIndex = 0;
+        var currentActiveResto = null;
+
+        // Render Lingkaran Buffer
+        function renderBuffers(items) {
+            bufferCirclesGroup.clearLayers();
+            if (!showBuffers) return;
+
+            items.forEach(function (item) {
+                var color = item.price_level === 'low' ? '#10b981' : (item.price_level === 'high' ? '#3b82f6' : '#1d4ed8');
+                L.circle([item.lat, item.lng], {
+                    radius: 400,
+                    color: color,
+                    weight: 1.5,
+                    dashArray: '4, 6',
+                    fillColor: color,
+                    fillOpacity: 0.12
+                }).addTo(bufferCirclesGroup);
+            });
+        }
+
+        // Render Markers
+        function renderMarkers(items) {
+            markersGroup.clearLayers();
+
+            items.forEach(function (item) {
+                var firstPhoto = (item.photos && item.photos.length > 0) ? ((typeof item.photos[0] === 'string') ? item.photos[0] : item.photos[0].url) : item.image_thumb;
+                var pinHtml = `
+                    <div class="custom-pin-element" id="pin-${item.id}">
+                        <div class="pin-inner-wrapper">
+                            <div class="pin-badge-id">#${item.id}</div>
+                            <div class="pin-head-shape">
+                                <img src="${firstPhoto}" class="pin-img-inside" alt="${item.name}">
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                var customIcon = L.divIcon({
+                    html: pinHtml,
+                    className: 'custom-leaflet-pin',
+                    iconSize: [44, 52],
+                    iconAnchor: [22, 48],
+                    popupAnchor: [0, -45]
+                });
+
+                var marker = L.marker([item.lat, item.lng], { icon: customIcon }).addTo(markersGroup);
+
+                marker.on('click', function () {
+                    showDetailModal(item);
+                    highlightItem(item.id);
+                    centerMapOnResto(item.lat, item.lng);
+                });
+            });
+
+            renderBuffers(items);
+        }
+
+        // Render List Restoran di Sidebar Kiri
+        function renderList(items) {
+            var container = document.getElementById('listScrollContainer');
+            if (!container) return;
+            container.innerHTML = '';
+            document.getElementById('badgeFilteredCount').innerText = items.length + ' Tempat';
+
+            items.forEach(function (item) {
+                var firstPhoto = (item.photos && item.photos.length > 0) ? ((typeof item.photos[0] === 'string') ? item.photos[0] : item.photos[0].url) : item.image_thumb;
+                var card = document.createElement('div');
+                card.className = 'resto-item-card';
+                card.id = 'listcard-' + item.id;
+                card.innerHTML = `
+                    <img src="${firstPhoto}" class="resto-thumb-img" alt="${item.name}" loading="lazy">
+                    <div class="resto-info-col">
+                        <div class="card-top-row">
+                            <span class="badge-resto-id">#${item.id}</span>
+                            <span class="card-rating-badge"><i class="fa-solid fa-star"></i> ${item.gmaps_rating}</span>
+                        </div>
+                        <h4 class="card-name-title">${item.name}</h4>
+                        <div class="card-cat-sub">${item.category}</div>
+                        <div class="card-price-txt">${item.price_est} <span style="font-weight: normal; color: var(--gray-500); font-size: 10px;">/ pax</span></div>
+                    </div>
+                `;
+
+                card.addEventListener('click', function () {
+                    showDetailModal(item);
+                    highlightItem(item.id);
+                    centerMapOnResto(item.lat, item.lng);
+                });
+
+                container.appendChild(card);
+            });
+        }
+
+        function getPhotoUrl(p) {
+            return (typeof p === 'string') ? p : (p.url || '');
+        }
+
+        // --- MAP VIEWPORT OFFSET CENTERING ---
+        function centerMapOnResto(lat, lng) {
+            if (!map) return;
+            var targetZoom = 15;
+            var targetPoint = map.project([lat, lng], targetZoom);
+            
+            var isMobile = window.innerWidth <= 768;
+            var offsetX = 0;
+            var offsetY = 0;
+
+            if (isMobile) {
+                var sheet = document.getElementById('mapidDetailCard');
+                var sheetH = (sheet && sheet.offsetHeight > 0) ? sheet.offsetHeight : (window.innerHeight * 0.55);
+                var freeHeight = Math.max(100, window.innerHeight - sheetH);
+                var visibleCenterY = freeHeight / 2;
+                var screenCenterY = window.innerHeight / 2;
+                offsetY = Math.round(screenCenterY - visibleCenterY);
+            } else {
+                var detailCard = document.getElementById('mapidDetailCard');
+                var sidebar = document.getElementById('leftContainer');
+                
+                var isSidebarVisible = sidebar && sidebar.style.display !== 'none' && !sidebar.classList.contains('collapsed');
+                var leftWidth = isSidebarVisible ? (sidebar.offsetLeft + sidebar.offsetWidth) : 0;
+                var rightWidth = (detailCard && detailCard.style.display !== 'none') ? (window.innerWidth - detailCard.offsetLeft) : 0;
+                
+                var freeStartX = leftWidth;
+                var freeEndX = window.innerWidth - rightWidth;
+                var freeCenterX = freeStartX + (freeEndX - freeStartX) / 2;
+                var screenCenterX = window.innerWidth / 2;
+                
+                offsetX = Math.round(screenCenterX - freeCenterX);
+            }
+
+            var newCenterPoint = targetPoint.add([offsetX, offsetY]);
+            var newCenterLatLng = map.unproject(newCenterPoint, targetZoom);
+
+            map.flyTo(newCenterLatLng, targetZoom, { duration: 0.8 });
+        }
+
+        // Inisialisasi Carousel Foto
+        function setupCarousel(photos) {
+            var track = document.getElementById('carouselTrack');
+            var dotsWrap = document.getElementById('carouselDots');
+            if (track) track.innerHTML = '';
+            if (dotsWrap) dotsWrap.innerHTML = '';
+            currentSlideIndex = 0;
+            totalSlides = photos ? photos.length : 0;
+
+            if (!photos || photos.length === 0) {
+                var counterEl = document.getElementById('carouselCounter');
+                if (counterEl) counterEl.innerText = '0 / 0';
+                return;
+            }
+
+            photos.forEach(function (p, idx) {
+                var photoUrl = getPhotoUrl(p);
+                var slide = document.createElement('div');
+                slide.className = 'carousel-slide-item';
+                slide.title = 'Klik untuk membuka foto Google Maps layar penuh';
+                slide.innerHTML = `<img src="${photoUrl}" alt="Google Maps Foto ${idx + 1}" loading="lazy" referrerpolicy="no-referrer">`;
+                slide.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    openGmapsLightbox(idx);
+                });
+                if (track) track.appendChild(slide);
+
+                var dot = document.createElement('div');
+                dot.className = 'carousel-dot-pill' + (idx === 0 ? ' active' : '');
+                dot.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    currentSlideIndex = idx;
+                    updateCarouselView();
+                });
+                if (dotsWrap) dotsWrap.appendChild(dot);
+            });
+
+            updateCarouselView();
+            renderGmapsGrid(photos);
+        }
+
+        // Render Grid Foto Google Maps di Kartu Detail
+        function renderGmapsGrid(photos) {
+            var grid = document.getElementById('gmapsPhotoGrid');
+            var countTag = document.getElementById('galleryCountTag');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            var total = photos ? photos.length : 0;
+            if (countTag) countTag.innerText = total + ' Foto';
+            if (total === 0) return;
+
+            photos.forEach(function (p, idx) {
+                var photoUrl = getPhotoUrl(p);
+                var thumb = document.createElement('div');
+                thumb.className = 'gmaps-grid-thumb';
+                thumb.title = 'Perbesar Foto #' + (idx + 1);
+                thumb.innerHTML = `<img src="${photoUrl}" alt="Foto ${idx + 1}" loading="lazy" referrerpolicy="no-referrer">`;
+                thumb.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    openGmapsLightbox(idx);
+                });
+                grid.appendChild(thumb);
+            });
+        }
+
+        function updateCarouselView() {
+            var track = document.getElementById('carouselTrack');
+            if (!track) return;
+            var width = track.clientWidth || 320;
+            track.scrollTo({
+                left: currentSlideIndex * width,
+                behavior: 'smooth'
+            });
+
+            var counter = document.getElementById('carouselCounter');
+            if (counter) counter.innerText = (currentSlideIndex + 1) + ' / ' + totalSlides;
+
+            var dots = document.querySelectorAll('.carousel-dot-pill');
+            dots.forEach(function (d, i) {
+                d.classList.toggle('active', i === currentSlideIndex);
+            });
+        }
+
+        function navigateCarousel(delta, e) {
+            if (e) { e.preventDefault(); e.stopPropagation(); }
+            if (totalSlides === 0) return;
+            currentSlideIndex = (currentSlideIndex + delta + totalSlides) % totalSlides;
+            updateCarouselView();
+        }
+
+        // Gestur Scroll Manual pada Carousel Track
+        var trackElement = document.getElementById('carouselTrack');
+        if (trackElement) {
+            trackElement.addEventListener('scroll', function () {
+                var width = trackElement.clientWidth || 320;
+                var newIndex = Math.round(trackElement.scrollLeft / width);
+                if (newIndex !== currentSlideIndex && newIndex >= 0 && newIndex < totalSlides) {
+                    currentSlideIndex = newIndex;
+                    var counter = document.getElementById('carouselCounter');
+                    if (counter) counter.innerText = (currentSlideIndex + 1) + ' / ' + totalSlides;
+                    var dots = document.querySelectorAll('.carousel-dot-pill');
+                    dots.forEach(function (d, i) {
+                        d.classList.toggle('active', i === currentSlideIndex);
+                    });
+                }
+            });
+        }
+
+        // ==========================================
+        // SISTEM GOOGLE MAPS LIGHTBOX FULLSCREEN
+        // ==========================================
+        function openGmapsLightbox(index) {
+            if (!currentActiveResto || !currentActiveResto.photos || currentActiveResto.photos.length === 0) return;
+            activeLightboxPhotos = currentActiveResto.photos;
+            activeLightboxIndex = (index >= 0 && index < activeLightboxPhotos.length) ? index : 0;
+
+            var titleEl = document.getElementById('lightboxRestoName');
+            if (titleEl) titleEl.innerText = currentActiveResto.name;
+
+            var gmapsLink = document.getElementById('lightboxGmapsLink');
+            if (gmapsLink) {
+                gmapsLink.href = currentActiveResto.gmaps_url || '#';
+            }
+
+            renderLightboxFilmstrip();
+            updateLightboxStage();
+
+            var lb = document.getElementById('gmapsLightbox');
+            if (lb) lb.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function updateLightboxStage() {
+            var img = document.getElementById('lightboxMainImg');
+            var total = activeLightboxPhotos.length;
+            var currentUrl = getPhotoUrl(activeLightboxPhotos[activeLightboxIndex]);
+
+            if (img) {
+                img.style.opacity = '0';
+                img.style.transform = 'scale(0.96)';
+
+                setTimeout(function () {
+                    img.src = currentUrl;
+                    img.style.opacity = '1';
+                    img.style.transform = 'scale(1)';
+                }, 100);
+            }
+
+            var counter = document.getElementById('lightboxCounter');
+            if (counter) counter.innerText = (activeLightboxIndex + 1) + ' / ' + total;
+
+            var filmThumbs = document.querySelectorAll('.filmstrip-thumb');
+            filmThumbs.forEach(function (t, i) {
+                t.classList.toggle('active', i === activeLightboxIndex);
+                if (i === activeLightboxIndex) {
+                    t.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                }
+            });
+        }
+
+        function renderLightboxFilmstrip() {
+            var strip = document.getElementById('lightboxFilmstrip');
+            if (!strip) return;
+            strip.innerHTML = '';
+            activeLightboxPhotos.forEach(function (p, i) {
+                var photoUrl = getPhotoUrl(p);
+                var t = document.createElement('div');
+                t.className = 'filmstrip-thumb' + (i === activeLightboxIndex ? ' active' : '');
+                t.innerHTML = `<img src="${photoUrl}" alt="Thumb ${i + 1}">`;
+                t.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    activeLightboxIndex = i;
+                    updateLightboxStage();
+                });
+                strip.appendChild(t);
+            });
+        }
+
+        function closeGmapsLightbox(e) {
+            if (e) { e.preventDefault(); e.stopPropagation(); }
+            var lb = document.getElementById('gmapsLightbox');
+            if (lb) lb.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function lightboxPrev(e) {
+            if (e) { e.preventDefault(); e.stopPropagation(); }
+            if (activeLightboxPhotos.length <= 1) return;
+            activeLightboxIndex = (activeLightboxIndex > 0) ? activeLightboxIndex - 1 : activeLightboxPhotos.length - 1;
+            updateLightboxStage();
+        }
+
+        function lightboxNext(e) {
+            if (e) { e.preventDefault(); e.stopPropagation(); }
+            if (activeLightboxPhotos.length <= 1) return;
+            activeLightboxIndex = (activeLightboxIndex < activeLightboxPhotos.length - 1) ? activeLightboxIndex + 1 : 0;
+            updateLightboxStage();
+        }
+
+        function handleLightboxBackdropClick(e) {
+            if (e.target.id === 'gmapsLightbox' || e.target.id === 'lightboxStage') {
+                closeGmapsLightbox();
+            }
+        }
+
+        // Daftarkan ke window global
+        window.openGmapsLightbox = openGmapsLightbox;
+        window.closeGmapsLightbox = closeGmapsLightbox;
+        window.lightboxPrev = lightboxPrev;
+        window.lightboxNext = lightboxNext;
+        window.handleLightboxBackdropClick = handleLightboxBackdropClick;
+        window.navigateCarousel = navigateCarousel;
+        window.closeDetailModal = closeDetailModal;
+
+        // Navigasi Keyboard
+        window.addEventListener('keydown', function (e) {
+            var lb = document.getElementById('gmapsLightbox');
+            if (!lb || !lb.classList.contains('active')) return;
+            if (e.key === 'Escape') closeGmapsLightbox();
+            else if (e.key === 'ArrowLeft') lightboxPrev();
+            else if (e.key === 'ArrowRight') lightboxNext();
+        });
+
+        // Touch swipe support on Lightbox for mobile
+        var touchStartX = 0;
+        var touchEndX = 0;
+        var lbStage = document.getElementById('gmapsLightbox');
+        if (lbStage) {
+            lbStage.addEventListener('touchstart', function (e) {
+                touchStartX = e.changedTouches[0].screenX;
+            }, { passive: true });
+
+            lbStage.addEventListener('touchend', function (e) {
+                touchEndX = e.changedTouches[0].screenX;
+                var diff = touchEndX - touchStartX;
+                if (Math.abs(diff) > 45) {
+                    if (diff < 0) {
+                        lightboxNext();
+                    } else {
+                        lightboxPrev();
+                    }
+                }
+            }, { passive: true });
+        }
+
+        // Tampilkan Detail Modal dengan Logika Tombol Kontak Cerdas (WhatsApp / Call Only)
+        function showDetailModal(item) {
+            currentActiveResto = item;
+
+            document.getElementById('modalNumberPill').innerText = '#' + item.id;
+            document.getElementById('modalTitle').innerText = item.name;
+            document.getElementById('modalCategory').innerText = item.category;
+            document.getElementById('modalDesc').innerText = item.desc;
+            document.getElementById('modalPriceRange').innerText = item.price_range;
+            document.getElementById('modalPriceEst').innerText = '~ ' + item.price_est + ' / pax';
+            document.getElementById('modalAddress').innerText = item.address;
+            document.getElementById('modalRatingText').innerText = item.gmaps_rating + ' (' + item.gmaps_reviews + ' ulasan)';
+            document.getElementById('modalContactPerson').innerText = item.contact_person;
+            document.getElementById('modalContactPhone').innerText = item.phone;
+
+            var cleanPhone = item.phone.replace(/[^0-9]/g, '');
+            var contactBtn = document.getElementById('modalWaBtn');
+
+            // Cek apakah jenis kontak adalah Call Only atau nomor telepon kantor lokal (021)
+            if (item.contact_type === 'call' || cleanPhone.startsWith('021') || cleanPhone.startsWith('21')) {
+                contactBtn.href = 'tel:' + cleanPhone;
+                contactBtn.innerHTML = '<i class="fa-solid fa-phone"></i> Telepon';
+                contactBtn.style.background = '#2563eb';
+                contactBtn.style.boxShadow = '0 4px 10px rgba(37, 99, 235, 0.3)';
+                contactBtn.title = 'Hubungi Langsung via Telepon (Call Only)';
+            } else {
+                if (cleanPhone.startsWith('0')) cleanPhone = '62' + cleanPhone.substring(1);
+                contactBtn.href = 'https://wa.me/' + cleanPhone + '?text=Halo%20' + encodeURIComponent(item.name) + ',%20saya%20ingin%20reservasi.';
+                contactBtn.innerHTML = '<i class="fa-brands fa-whatsapp"></i> Chat WA';
+                contactBtn.style.background = '#25d366';
+                contactBtn.style.boxShadow = '0 4px 10px rgba(37, 211, 102, 0.3)';
+                contactBtn.title = 'Kirim Pesan Reservasi via WhatsApp';
+            }
+
+            document.getElementById('modalDirBtn').href = item.gmaps_url;
+
+            // Inisialisasi Carousel & Galeri Foto
+            setupCarousel(item.photos);
+
+            var detailCard = document.getElementById('mapidDetailCard');
+            detailCard.style.display = 'block';
+
+            // Di mobile: sembunyikan drawer panel list agar ruang layar bersih
+            if (window.innerWidth <= 768) {
+                var leftPanel = document.getElementById('leftContainer');
+                if (leftPanel) leftPanel.classList.add('sheet-hidden');
+            }
+
+            // Geser peta agar restoran berada di tengah ruang pandang yang bebas
+            centerMapOnResto(item.lat, item.lng);
+        }
+
+        function closeDetailModal(e) {
+            if (e) { e.preventDefault(); e.stopPropagation(); }
+            var detailCard = document.getElementById('mapidDetailCard');
+            if (detailCard) detailCard.style.display = 'none';
+
+            // Di mobile: munculkan kembali panel list
+            if (window.innerWidth <= 768) {
+                var leftPanel = document.getElementById('leftContainer');
+                if (leftPanel) leftPanel.classList.remove('sheet-hidden');
+            }
+
+            if (currentActiveResto) {
+                map.flyTo([currentActiveResto.lat, currentActiveResto.lng], 14, { duration: 0.6 });
+            }
+        }
+
+        function highlightItem(id) {
+            document.querySelectorAll('.resto-item-card').forEach(function (c) {
+                c.classList.remove('active');
+            });
+            var target = document.getElementById('listcard-' + id);
+            if (target) {
+                target.classList.add('active');
+                target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        // Render Awal
+        renderMarkers(restaurantsData);
+        renderList(restaurantsData);
+
+        // Event Listener Header & Search
+        document.getElementById('searchInput').addEventListener('input', function (e) {
+            var query = e.target.value.toLowerCase();
+            var filtered = restaurantsData.filter(function (r) {
+                return r.name.toLowerCase().includes(query) ||
+                    r.address.toLowerCase().includes(query) ||
+                    r.category.toLowerCase().includes(query);
+            });
+            renderMarkers(filtered);
+            renderList(filtered);
+        });
+
+        document.getElementById('btnToggleBuffer').addEventListener('click', function () {
+            showBuffers = !showBuffers;
+            this.classList.toggle('active', showBuffers);
+            renderBuffers(restaurantsData);
+        });
+
+        document.getElementById('btnToggleDrawer').addEventListener('click', function () {
+            var left = document.getElementById('leftContainer');
+            left.classList.toggle('sheet-hidden');
+            this.classList.toggle('active', !left.classList.contains('sheet-hidden'));
+        });
+
+        document.getElementById('btnBrandReset').addEventListener('click', function () {
+            map.fitBounds(markersGroup.getBounds().pad(0.18));
+        });
+
+        // Kontrol Peta
+        document.getElementById('btnZoomIn').addEventListener('click', function () {
+            map.zoomIn();
+        });
+        document.getElementById('btnZoomOut').addEventListener('click', function () {
+            map.zoomOut();
+        });
+        document.getElementById('btnFitAll').addEventListener('click', function () {
+            map.fitBounds(markersGroup.getBounds().pad(0.18));
+        });
+
+        document.getElementById('btnLayerToggle').addEventListener('click', function () {
+            map.removeLayer(layers[layerIndex]);
+            layerIndex = (layerIndex + 1) % layers.length;
+            map.addLayer(layers[layerIndex]);
+        });
+    </script>
+</body>
+
+</html>
